@@ -1,0 +1,20 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kusoge-frontend
+  labels:
+    name: kusoge-frontend
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: "app.kusoge.watashinoheyadesu.pp.ua"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: kusoge-frontend
+            port: 
+              number: 8080
