@@ -1,0 +1,30 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Release.Name }}-frontend"
+  namespace: {{ .Values.namespace }}
+  labels:
+    name: "{{ .Chart.Name }}-{{ .Release.Name }}-frontend"
+{{- if .Values.frontend_svc.ingress.annotations }}
+  annotations:
+{{ toYaml .Values.frontend_svc.ingress.annotations | indent 4 }}
+{{- end }}
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: {{ .Values.frontend_svc.ingress.host }}
+    http:
+      paths:
+{{- if hasKey .Values.frontend_svc.ingress "http" }}
+      - pathType: {{ .Values.frontend_svc.ingress.http.pathType | default "Prefix" }}
+        path: {{ .Values.frontend_svc.ingress.http.path | default "/" }}
+{{- else }}
+      - pathType: "Prefix"
+        path: "/"
+{{- end }}
+        backend:
+          service:
+            name: "{{ .Chart.Name }}-{{ .Release.Name }}-frontend-ip"
+            port: 
+              number: {{ .Values.frontend_svc.targetPort | default .Values.frontend_svc.port }}

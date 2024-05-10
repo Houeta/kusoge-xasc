@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Release.Name }}-catalog-ip"
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: "{{ .Chart.Name }}-{{ .Release.Name }}-catalog"
+  ports:
+  - port: {{ .Values.catalog_svc.port }}
+    targetPort: {{ .Values.catalog_svc.targetPort | default .Values.catalog_svc.port }}

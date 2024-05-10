@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Release.Name }}-auth"
+  namespace: {{ .Values.namespace }}
+{{- if .Values.auth_svc.annotations }}
+  annotations:
+{{ toYaml .Values.auth_svc.annotations | indent 4 }}
+{{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: "{{ .Chart.Name }}-{{ .Release.Name }}-auth"
+  template:
+    metadata:
+      labels:
+        project: {{ .Chart.Name }}
+        app: "{{ .Chart.Name }}-{{ .Release.Name }}-auth"
+    spec:
+      containers:
+      - name: "{{ .Chart.Name }}-{{ .Release.Name }}-auth"
+        image: "{{ .Values.auth_svc.image.repository}}:{{ .Values.auth_svc.image.tag}}"
+        env:
+{{- if .Values.auth_svc.env}}
+        {{- range $key, $val := .Values.auth_svc.env }}
+        - name: {{ $key | quote }}
+          value: {{ $val | quote }}
+        {{- end }}
+{{- end }}
+{{- if .Values.db.env }}
+        {{- range $key, $val := .Values.db.env }}
+        - name: {{ $key | quote }}
+          value: {{ $val | quote }}
+        {{- end }}
+{{- end }}
+        - name: "PG_HOST"
+          value: "{{ .Chart.Name }}-{{ .Release.Name }}-db-headless.{{ .Values.namespace }}.svc.cluster.local"
+{{- if .Values.auth_svc.resources }}
+        resources:
+{{ toYaml .Values.auth_svc.resources | indent 10 }}
+{{- end }}
+        ports:
+        - containerPort: {{ .Values.auth_svc.port | default 5000 }}

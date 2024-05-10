@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Release.Name }}-catalog"
+  namespace: {{ .Values.namespace }}
+{{- if .Values.catalog_svc.annotations }}
+  annotations:
+{{ toYaml .Values.catalog_svc.annotations | indent 4 }}
+{{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: "{{ .Chart.Name }}-{{ .Release.Name }}-catalog"
+  template:
+    metadata:
+      labels:
+        project: {{ .Chart.Name }}
+        app: "{{ .Chart.Name }}-{{ .Release.Name }}-catalog"
+    spec:
+      containers:
+      - name: "{{ .Chart.Name }}-{{ .Release.Name }}-catalog"
+        image: "{{ .Values.catalog_svc.image.repository}}:{{ .Values.catalog_svc.image.tag}}"
+        env:
+{{- if .Values.catalog_svc.env}}
+        {{- range $key, $val := .Values.catalog_svc.env }}
+        - name: {{ $key | quote }}
+          value: {{ $val | quote }}
+        {{- end }}
+{{- end }}
+{{- if .Values.db.env }}
+        {{- range $key, $val := .Values.db.env }}
+        - name: {{ $key | quote }}
+          value: {{ $val | quote }}
+        {{- end }}
+{{- end }}
+        - name: "PG_HOST"
+          value: "{{ .Chart.Name }}-{{ .Release.Name }}-db-headless.{{ .Values.namespace }}.svc.cluster.local"
+{{- if .Values.catalog_svc.resources }}
+        resources:
+{{ toYaml .Values.catalog_svc.resources | indent 10 }}
+{{- else }}
+        resources:
+{{ toYaml .Values.global.resources | indent 10 }}
+{{- end }}
+        ports:
+        - containerPort: {{ .Values.catalog_svc.port | default 5000 }}

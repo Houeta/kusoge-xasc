@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Release.Name }}-frontend"
+  namespace: {{ .Values.namespace }}
+{{- if .Values.frontend_svc.annotations }}
+  annotations:
+{{ toYaml .Values.frontend_svc.annotations | indent 4 }}
+{{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: "{{ .Chart.Name }}-{{ .Release.Name }}-frontend"
+  template:
+    metadata:
+      labels:
+        project: {{ .Chart.Name }}
+        app: "{{ .Chart.Name }}-{{ .Release.Name }}-frontend"
+    spec:
+      containers:
+      - name: "{{ .Chart.Name }}-{{ .Release.Name }}-frontend"
+        image: "{{ .Values.frontend_svc.image.repository}}:{{ .Values.frontend_svc.image.tag}}"
+        env:
+{{- if .Values.frontend_svc.env}}
+        {{- range $key, $val := .Values.frontend_svc.env }}
+        - name: {{ $key | quote }}
+          value: {{ $val | quote }}
+        {{- end }}
+{{- end }}
+        - name: "AUTH_SVC"
+          value: "{{ .Chart.Name }}-{{ .Release.Name }}-auth-ip.{{ .Values.namespace }}.svc.cluster.local"
+        - name: "AUTH_PORT"
+          value: "{{ .Values.auth_svc.targetPort | default .Values.auth_svc.port }}"
+        - name: "PROD_SVC_HOSTNAME"
+          value: "{{ .Chart.Name }}-{{ .Release.Name }}-catalog-ip.{{ .Values.namespace }}.svc.cluster.local"
+        - name: "PROD_SVC_PORT"
+          value: "{{ .Values.catalog_svc.targetPort | default .Values.catalog_svc.port }}"
+{{- if .Values.frontend_svc.resources }}
+        resources:
+{{ toYaml .Values.frontend_svc.resources | indent 10 }}
+{{- else }}
+        resources:
+{{ toYaml .Values.global.resources | indent 10 }}
+{{- end }}
+        ports:
+        - containerPort: {{ .Values.frontend_svc.port | default 8080 }}

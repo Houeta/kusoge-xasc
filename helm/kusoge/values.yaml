@@ -1,0 +1,77 @@
+namespace: dev
+
+auth_svc:
+  image:
+    repository: pathetic/kusoge-auth-svc
+    tag: v0.0.7
+  port: 5000
+  targetPort: 5000
+  env:
+    PG_AUTH_TABLE: auth_user
+
+catalog_svc:
+  image:
+    repository: pathetic/kusoge-catalog-svc
+    tag: v0.0.8
+  port: 5000
+  targetPort: 5000
+  env:
+    PG_PRODUCT_TABLE: products
+
+  resources:
+    requests:
+      memory: "150Mi"
+    limits:
+      memory: "260Mi"
+
+db:
+  image:
+    repository: postgres
+    tag: alpine3.19
+  port: 5432
+  env:
+    POSTGRES_DB: KUSOGE_SHOP
+    POSTGRES_USER: kusoge
+    POSTGRES_PASSWORD: example
+
+  storage_capacity: "10Gi"
+
+  liveness_exec:
+    command:
+    - bash
+    - -ec
+    - 'PGPASSWORD=$POSTGRES_PASSWORD psql -w -U $POSTGRES_USER -d $POSTGRES_DB -h 127.0.0.1 -c "SELECT 1"'
+
+frontend_svc:
+  image:
+    repository: pathetic/kusoge-frontend-svc
+    tag: v0.0.6
+  port: 8080
+  targetPort: 8080
+
+  ingress:
+    host: "app.kusoge.watashinoheyadesu.pp.ua"
+
+  resources:
+    requests:
+      memory: "150Mi"
+    limits:
+      memory: "260Mi"
+
+global:
+  resources:
+    requests:
+      memory: "90Mi"
+    limits:
+      memory: "256Mi"
+  
+  hpa:
+    minReplicas: 1
+    maxReplicas: 3
+    metrics:
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75

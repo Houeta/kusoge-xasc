@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Release.Name }}-frontend-ip"
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: "{{ .Chart.Name }}-{{ .Release.Name }}-frontend"
+  ports:
+  - port: {{ .Values.frontend_svc.port }}
+    targetPort: {{ .Values.frontend_svc.targetPort | default .Values.frontend_svc.port }}

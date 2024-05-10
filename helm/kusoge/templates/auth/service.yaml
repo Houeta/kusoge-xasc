@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Release.Name }}-auth-ip"
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: "{{ .Chart.Name }}-{{ .Release.Name }}-auth"
+  ports:
+  - port: {{ .Values.auth_svc.port }}
+    targetPort: {{ .Values.auth_svc.targetPort }}

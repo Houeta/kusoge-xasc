@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Release.Name }}-init-sql"
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: "{{ .Chart.Name }}-{{ .Release.Name }}"
+data:
+  init.sql: |
+    CREATE TABLE auth_user (
+        id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        email VARCHAR (255) NOT NULL,
+        name VARCHAR (255) NOT NULL,
+        password VARCHAR (255) NOT NULL
+    );
+
+    INSERT INTO auth_user (email, name, password) VALUES ('miracle1695@gmail.com', 'miracle', '123456');
+
+    CREATE TABLE products (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR NOT NULL,
+        description TEXT,
+        price NUMERIC NOT NULL
+    );

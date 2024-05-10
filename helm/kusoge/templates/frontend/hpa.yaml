@@ -1,0 +1,24 @@
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: "{{ .Chart.Name }}-{{ .Release.Name }}-frontend"
+  namespace: {{ .Values.namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: "{{ .Chart.Name }}-{{ .Release.Name }}-frontend"
+{{-  if hasKey .Values.frontend_svc "hpa" }}
+  minReplicas: {{ .Values.frontend_svc.hpa.minReplicas | default .Values.global.hpa.minReplicas }}
+  maxReplicas: {{ .Values.frontend_svc.hpa.maxReplicas | default .Values.global.hpa.maxReplicas }}
+{{- else }}
+  minReplicas: {{ .Values.global.hpa.minReplicas | default 1 }}
+  maxReplicas: {{ .Values.global.hpa.maxReplicas | default 1 }}
+{{- end }}
+  metrics:
+{{- if hasKey .Values.frontend_svc "hpa" }}
+{{ toYaml .Values.frontend_svc.hpa.metrics | indent 2 }}
+{{- else }}
+{{ toYaml .Values.global.hpa.metrics | indent 2}}
+{{- end }}
