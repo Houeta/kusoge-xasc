@@ -14,6 +14,11 @@ configs:
             clientSecret: ${ argocd_github_client_secret }
             orgs:
               - name: ${ argocd_github_org_name }
+    
+  rbac:
+    policy.csv: |
+      g, ${ argocd_github_org_name }:admin, role:admin
+      g, ${ argocd_github_org_name }:backend, role:readonly
 
 server:
   ingress:
