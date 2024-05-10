@@ -10,3 +10,7 @@ data "aws_eks_cluster_auth" "this" {
 data "http" "workstation-external-ip" {
   url = "http://ipv4.icanhazip.com"
 }
+
+data "aws_iam_policy" "ebs_csi_policy" {
+  arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}
