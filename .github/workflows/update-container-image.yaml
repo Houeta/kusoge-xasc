@@ -29,7 +29,10 @@ jobs:
       run: echo "New image is ${{ env.IMAGE_NAME }}"
     
     - name: Install yq
-      uses: chrisdickinson/setup-yq@latest
+      uses: dcarbone/install-yq-action@v1.1.1
+      with:
+        version: 'v4.40.5'
+        download-comressed: true
     
     - name: Update values.yaml
       run: |
