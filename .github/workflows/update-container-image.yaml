@@ -33,6 +33,7 @@ jobs:
     
     - name: Update values.yaml
       run: |
+        yq -V
         'yq -i e ".${{github.event.inputs.helm_name}}.image.repository = \"${{ github.event.inputs.image }}\"" helm/values.yaml'
         'yq -i e ".${{github.event.inputs.helm_name}}.image.tag = \"${{ github.event.inputs.sha }}\"" helm/values.yaml'
     
