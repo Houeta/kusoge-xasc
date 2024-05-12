@@ -39,16 +39,22 @@ jobs:
         yq -i ".${{github.event.inputs.helm_name}}.image.repository = \"${{ github.event.inputs.image }}\"" helm/values.yaml
         yq -i ".${{github.event.inputs.helm_name}}.image.tag = \"${{ github.event.inputs.sha }}\"" helm/values.yaml
     
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
-      id: cpr
-      with:
-        title: ${{github.event.inputs.message}}
-        branch: update-image-${{ github.event.inputs.sha }}
-        commit-message: update backend image tag to ${{ env.IMAGE_NAME }}
+    # - name: Create Pull Request
+    #   uses: peter-evans/create-pull-request@v5
+    #   id: cpr
+    #   with:
+    #     title: ${{github.event.inputs.message}}
+    #     branch: update-image-${{ github.event.inputs.sha }}
+    #     commit-message: update backend image tag to ${{ env.IMAGE_NAME }}
     
-    - name: Check outputs
-      if: ${{ steps.cpr.outputs.pull-request-number }}
-      run: |
-        echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
-        echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+    # - name: Check outputs
+    #   if: ${{ steps.cpr.outputs.pull-request-number }}
+    #   run: |
+    #     echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+    #     echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+
+    - name: Commit and push changes
+      uses: devops-infra/action-commit-push@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        commit_message: update backend image tag to ${{ env.IMAGE_NAME }}
