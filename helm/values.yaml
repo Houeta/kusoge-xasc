@@ -10,7 +10,7 @@ auth_svc:
 catalog_svc:
   image:
     repository: pathetic/kusoge-catalog-svc
-    tag: v0.0.8
+    tag: 44fc77e
   port: 5000
   targetPort: 5000
   env:
