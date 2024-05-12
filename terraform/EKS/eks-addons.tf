@@ -32,6 +32,14 @@ resource "helm_release" "metrics" {
   create_namespace = true
 }
 
+resource "helm_release" "external_secrets" {
+  name = "external-secrets"
+  repository = "https://charts.external-secrets.io"
+  chart = "external-secrets"
+  namespace = "kube-system"
+  version = "0.5.0"
+}
+
 # module "eks_blueprints_addons" {
 #   source = "aws-ia/eks-blueprints-addons/aws"
 #   version = "~> 1.16" #ensure to update this to the latest/desired version
