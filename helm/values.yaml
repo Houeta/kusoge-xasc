@@ -2,7 +2,7 @@ namespace: dev
 auth_svc:
   image:
     repository: pathetic/kusoge-auth-svc
-    tag: "5962125"
+    tag: "2ac94fb"
   port: 5000
   targetPort: 5000
   env:
