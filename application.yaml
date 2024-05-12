@@ -8,7 +8,7 @@ spec:
 
   source:
     repoURL: https://github.com/Houeta/kusoge-xasc.git
-    path: helm/kusoge
+    path: helm
     targetRevision: HEAD
     helm:
       valueFiles:
