@@ -11,6 +11,7 @@ spec:
     path: helm
     targetRevision: HEAD
     helm:
+      releaseName: kusoge
       valueFiles:
         - values.yaml
 
