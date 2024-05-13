@@ -40,6 +40,18 @@ resource "helm_release" "external_secrets" {
   version = "0.5.0"
 }
 
+resource "kubernetes_service_account" "this" {
+  metadata {
+    name = "es-service-account"
+    namespace = "external-secrets"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = module.iam_assumable_role_external_secrets.arn
+    }
+  }
+  automount_service_account_token = true
+}
+
+
 # module "eks_blueprints_addons" {
 #   source = "aws-ia/eks-blueprints-addons/aws"
 #   version = "~> 1.16" #ensure to update this to the latest/desired version
