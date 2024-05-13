@@ -24,11 +24,22 @@ spec:
       containers:
       - name: "{{ .Chart.Name }}-{{ .Release.Name }}-db"
         image: "{{ .Values.db.image.repository}}:{{ .Values.db.image.tag }}"
-{{- if .Values.db.env }}
+{{- if or .Values.db.env .Values.db.secrets }}
         env:
+{{- end }}
+{{- if .Values.db.env }}
         {{- range $key, $val := .Values.db.env }}
         - name: {{ $key | quote }}
           value: {{ $val | quote }}
+        {{- end }}
+{{- end }}
+{{- if .Values.db.secrets }}
+        {{- range $key, $val := .Values.db.secrets }}
+        - name: {{ $key |quote }}
+          valueFrom:
+            secretKeyRef:
+              name: "secret-store"
+              key: {{ $val }}
         {{- end }}
 {{- end }}
 {{- if .Values.db.resources }}

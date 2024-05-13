@@ -21,24 +21,46 @@ spec:
       containers:
       - name: "{{ .Chart.Name }}-{{ .Release.Name }}-auth"
         image: "{{ .Values.auth_svc.image.repository}}:{{ .Values.auth_svc.image.tag}}"
+
         env:
-{{- if .Values.auth_svc.env}}
+{{- if .Values.auth_svc.env }}
         {{- range $key, $val := .Values.auth_svc.env }}
         - name: {{ $key | quote }}
           value: {{ $val | quote }}
         {{- end }}
 {{- end }}
-{{- if .Values.db.env }}
-        {{- range $key, $val := .Values.db.env }}
+{{- if .Values.auth_svc.secrets }}
+        {{- range $key, $val := .Values.auth_svc.secrets }}
         - name: {{ $key | quote }}
-          value: {{ $val | quote }}
+          valueFrom:
+            secretKeyRef:
+              name: "secret-store"
+              key: {{ $val }}
         {{- end }}
 {{- end }}
         - name: "PG_HOST"
           value: "{{ .Chart.Name }}-{{ .Release.Name }}-db-headless.{{ .Values.namespace }}.svc.cluster.local"
+
 {{- if .Values.auth_svc.resources }}
         resources:
 {{ toYaml .Values.auth_svc.resources | indent 10 }}
 {{- end }}
         ports:
         - containerPort: {{ .Values.auth_svc.port | default 5000 }}
+
+{{- if .Values.auth_svc.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.auth_svc.livenessProbe.path | default "/" }}
+            port: {{ .Values.auth_svc.livenessProbe.port | default .Values.auth_svc.port }}
+          initialDelaySeconds: {{ .Values.auth_svc.livenessProbe.initialDelaySeconds | default 15 }}
+          periodSeconds: {{ .Values.auth_svc.livenessProbe.periodSeconds | default 20 }}
+{{- end }}
+{{- if .Values.auth_svc.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.auth_svc.readinessProbe.path | default "/healthcheck" }}
+            port: {{ .Values.auth_svc.readinessProbe.port | default .Values.auth_svc.port }}
+          initialDelaySeconds: {{ .Values.auth_svc.livenessProbe.initialDelaySeconds | default 5 }}
+          periodSeconds: {{ .Values.auth_svc.livenessProbe.periodSeconds | default 10 }}
+{{- end }}

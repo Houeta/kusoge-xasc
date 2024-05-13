@@ -31,7 +31,7 @@ spec:
         - name: "AUTH_SVC"
           value: "{{ .Chart.Name }}-{{ .Release.Name }}-auth-ip.{{ .Values.namespace }}.svc.cluster.local"
         - name: "AUTH_PORT"
-          value: "{{ .Values.auth_svc.targetPort | default .Values.auth_svc.port }}"
+          value: "{{ .Values.frontend_svc.targetPort | default .Values.frontend_svc.port }}"
         - name: "PROD_SVC_HOSTNAME"
           value: "{{ .Chart.Name }}-{{ .Release.Name }}-catalog-ip.{{ .Values.namespace }}.svc.cluster.local"
         - name: "PROD_SVC_PORT"
@@ -45,3 +45,20 @@ spec:
 {{- end }}
         ports:
         - containerPort: {{ .Values.frontend_svc.port | default 8080 }}
+
+{{- if .Values.frontend_svc.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.frontend_svc.livenessProbe.path | default "/" }}
+            port: {{ .Values.frontend_svc.livenessProbe.port | default .Values.frontend_svc.port }}
+          initialDelaySeconds: {{ .Values.frontend_svc.livenessProbe.initialDelaySeconds | default 15 }}
+          periodSeconds: {{ .Values.frontend_svc.livenessProbe.periodSeconds | default 20 }}
+{{- end }}
+{{- if .Values.frontend_svc.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.frontend_svc.readinessProbe.path | default "/healthcheck" }}
+            port: {{ .Values.frontend_svc.readinessProbe.port | default .Values.frontend_svc.port }}
+          initialDelaySeconds: {{ .Values.frontend_svc.livenessProbe.initialDelaySeconds | default 5 }}
+          periodSeconds: {{ .Values.frontend_svc.livenessProbe.periodSeconds | default 10 }}
+{{- end }}

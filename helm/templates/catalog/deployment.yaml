@@ -22,16 +22,19 @@ spec:
       - name: "{{ .Chart.Name }}-{{ .Release.Name }}-catalog"
         image: "{{ .Values.catalog_svc.image.repository}}:{{ .Values.catalog_svc.image.tag}}"
         env:
-{{- if .Values.catalog_svc.env}}
+{{- if .Values.catalog_svc.env }}
         {{- range $key, $val := .Values.catalog_svc.env }}
         - name: {{ $key | quote }}
           value: {{ $val | quote }}
         {{- end }}
 {{- end }}
-{{- if .Values.db.env }}
-        {{- range $key, $val := .Values.db.env }}
+{{- if .Values.catalog_svc.secrets }}
+        {{- range $key, $val := .Values.catalog_svc.secrets }}
         - name: {{ $key | quote }}
-          value: {{ $val | quote }}
+          valueFrom:
+            secretKeyRef:
+              name: "secret-store"
+              key: {{ $val }}
         {{- end }}
 {{- end }}
         - name: "PG_HOST"
@@ -45,3 +48,20 @@ spec:
 {{- end }}
         ports:
         - containerPort: {{ .Values.catalog_svc.port | default 5000 }}
+
+{{- if .Values.catalog_svc.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.catalog_svc.livenessProbe.path | default "/" }}
+            port: {{ .Values.catalog_svc.livenessProbe.port | default .Values.catalog_svc.port }}
+          initialDelaySeconds: {{ .Values.catalog_svc.livenessProbe.initialDelaySeconds | default 15 }}
+          periodSeconds: {{ .Values.catalog_svc.livenessProbe.periodSeconds | default 20 }}
+{{- end }}
+{{- if .Values.catalog_svc.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.catalog_svc.readinessProbe.path | default "/healthcheck" }}
+            port: {{ .Values.catalog_svc.readinessProbe.port | default .Values.catalog_svc.port }}
+          initialDelaySeconds: {{ .Values.catalog_svc.livenessProbe.initialDelaySeconds | default 5 }}
+          periodSeconds: {{ .Values.catalog_svc.livenessProbe.periodSeconds | default 10 }}
+{{- end }}
