@@ -54,7 +54,7 @@ db:
 frontend_svc:
   image:
     repository: pathetic/kusoge-frontend-svc
-    tag: 44fc77e
+    tag: "5571765"
   port: 8080
   targetPort: 8080
   ingress:
