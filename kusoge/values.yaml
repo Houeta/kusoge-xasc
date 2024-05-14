@@ -1,51 +1,41 @@
 namespace: dev
-
 auth_svc:
   image:
     repository: pathetic/kusoge-auth-svc
-    tag: "2ac94fb"
-
+    tag: "2ce9825"
   port: 5000
   targetPort: 5000
-
   env:
     PG_AUTH_TABLE: auth_user
   secrets:
     POSTGRES_DB: db_name
     POSTGRES_USER: db_user
     POSTGRES_PASSWORD: db_password
-
   livenessProbe:
     enabled: true
   readinessProbe:
     enabled: true
-
 catalog_svc:
   image:
     repository: pathetic/kusoge-catalog-svc
     tag: 44fc77e
   port: 5000
   targetPort: 5000
-
   env:
     PG_PRODUCT_TABLE: products
   secrets:
     POSTGRES_DB: db_name
     POSTGRES_USER: db_user
     POSTGRES_PASSWORD: db_password
-
   resources:
     requests:
       memory: "150Mi"
     limits:
       memory: "260Mi"
-
   livenessProbe:
     enabled: true
   readinessProbe:
     enabled: true
-
-
 db:
   image:
     repository: postgres
@@ -61,15 +51,12 @@ db:
       - bash
       - -ec
       - 'PGPASSWORD=$POSTGRES_PASSWORD psql -w -U $POSTGRES_USER -d $POSTGRES_DB -h 127.0.0.1 -c "SELECT 1"'
-
-
 frontend_svc:
   image:
     repository: pathetic/kusoge-frontend-svc
     tag: 44fc77e
   port: 8080
   targetPort: 8080
-
   ingress:
     host: "app.kusoge.watashinoheyadesu.pp.ua"
   resources:
@@ -77,19 +64,16 @@ frontend_svc:
       memory: "150Mi"
     limits:
       memory: "260Mi"
-  
   livenessProbe:
     enabled: true
   readinessProbe:
     enabled: true
-
 global:
   resources:
     requests:
       memory: "90Mi"
     limits:
       memory: "256Mi"
-
   hpa:
     minReplicas: 1
     maxReplicas: 3
@@ -100,14 +84,13 @@ global:
           target:
             type: Utilization
             averageUtilization: 75
-
 secrets:
   enabled: true
   ss_region: eu-central-1
   keyRef:
-  - secretKey: db_name
-    awsKey: postgres_db
-  - secretKey: db_user
-    awsKey: postgres_user
-  - secretKey: db_password
-    awsKey: postgres_password
+    - secretKey: db_name
+      awsKey: postgres_db
+    - secretKey: db_user
+      awsKey: postgres_user
+    - secretKey: db_password
+      awsKey: postgres_password
