@@ -2,12 +2,11 @@
 
 locals {
   cluster_role_name = "${local.global_prefix}-cluster-role"
-  node_role_name = "${local.global_prefix}-node-role"
+  node_role_name    = "${local.global_prefix}-node-role"
 }
 
 resource "aws_iam_role" "cluster" {
-  name = "${local.global_prefix}-cluster-0"
-
+  name               = "${local.global_prefix}-cluster-0"
   assume_role_policy = <<POLICY
 {
   "Version": "2012-10-17",
@@ -56,7 +55,7 @@ module "oidc-provider-data" {
 
 # For nodes
 resource "aws_iam_role" "node" {
-  name = "${local.global_prefix}-node-0"
+  name               = "${local.global_prefix}-node-0"
   assume_role_policy = <<POLICY
 {
   "Version": "2012-10-17",
@@ -137,23 +136,42 @@ module "ebs_csi_irsa_role" {
 ####################################
 locals {
   external_secrets = {
-    namespace = "external-secrets"
-    service_account_name = "${local.global_prefix}-ES-SA"
+    namespace            = "external-secrets"
+    service_account_name = "es-service-account"
   }
 }
 
 module "iam_assumable_role_external_secrets" {
-  source = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version = "5.39.0"
-  create_role = true
-  role_name = "${local.global_prefix}-external-secrets"
-  provider_url = replace(aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")
-  role_policy_arns = [aws_iam_policy.external_secrets.arn]
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.39.0"
+  create_role                   = true
+  role_name                     = "${local.global_prefix}-external-secrets"
+  provider_url                  = replace(aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")
+  role_policy_arns              = [aws_iam_policy.external_secrets.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.external_secrets.namespace}:${local.external_secrets.service_account_name}"]
 }
 
+
+resource "kubernetes_service_account" "this" {
+  metadata {
+    name      = local.external_secrets.service_account_name
+    namespace = kubernetes_namespace.external_secrets.metadata[0].name
+
+    annotations = {
+      "eks.amazonaws.com/role-arn" = module.iam_assumable_role_external_secrets.iam_role_arn
+    }
+  }
+  automount_service_account_token = true
+}
+
+resource "kubernetes_namespace" "external_secrets" {
+  metadata {
+    name = local.external_secrets.namespace
+  }
+}
+
 resource "aws_iam_policy" "external_secrets" {
-  name = "${local.global_prefix}-external-secrets-policy"
+  name        = "${local.global_prefix}-external-secrets-policy"
   description = "EKS AWS external secrets policy for cluster ${aws_eks_cluster.this.name}"
 
   policy = <<EOF

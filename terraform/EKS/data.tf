@@ -15,4 +15,12 @@ data "aws_iam_policy" "ebs_csi_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
+data "aws_iam_policy" "external_dns" {
+  name = "external-dns-irsa-external-dns"
+}
+
+data "aws_iam_role" "external_dns" {
+  name = "external-dns-irsa-external-dns"
+}
+
 data "aws_caller_identity" "account" {}

@@ -18,8 +18,8 @@ resource "aws_eks_node_group" "amd" {
   instance_types = var.node_instances_type
 
   labels = merge(var.node_additional_tags,
-  {
-    "node-type" : "general"
+    {
+      "node-type" : "general"
   })
 
   depends_on = [

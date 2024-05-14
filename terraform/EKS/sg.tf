@@ -1,5 +1,5 @@
 locals {
-  sg_name = "${local.global_prefix}-eks-sg"
+  sg_name                   = "${local.global_prefix}-eks-sg"
   workstation-external-cidr = "${chomp(data.http.workstation-external-ip.response_body)}/32"
 }
 

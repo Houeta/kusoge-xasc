@@ -1,10 +1,10 @@
 variable "project" {
   description = "Project name"
-  type = string
+  type        = string
 }
 
 variable "profile" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -14,10 +14,10 @@ variable "region" {
 
 variable "username" {
   description = "Owner's username"
-  type = string
+  type        = string
 }
 
 variable "tags" {
-  type = map(any)
+  type    = map(any)
   default = {}
 }
