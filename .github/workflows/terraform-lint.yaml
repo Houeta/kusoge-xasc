@@ -1,0 +1,66 @@
+---
+name: "Terraform Lint"
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths:
+      - "terraform/EKS/*"
+      - ".github/workflows/terraform-lint.yaml"
+
+env:
+  WORDKIR: terraform/EKS
+
+jobs:
+  tf_lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORDKIR }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Terraform Lint
+        uses: actionshub/terraform-lint@main
+  
+  tf_format:
+    name: Code Format
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORDKIR }}
+    container:
+      image: hashicorp/terraform:latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Terraform format
+        run: terraform fmt --recursive -check=true
+  
+  tf_validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORDKIR }}
+    container:
+      image: hashicorp/terraform:latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Validate Code
+        env:
+          AWS_REGION: 'eu-central-1'
+          TF_VAR_env: 'test'
+          TF_VAR_project: 'test'
+          TF_VAR_vpc_id: 'vpc-123456'
+          TF_VAR_subnets_ids: '["subnet-0b27929ad2896d99f", "subnet-0b27929ad2896d99f", "subnet-0b27929ad2896d99f"]' 
+          TF_VAR_zone_name: 'example.domain.com'
+          TF_VAR_argocd_github_client_id: 'client_id'
+          TF_VAR_argocd_github_client_secret: 'client_secret'
+          TF_VAR_argocd_github_org_name: 'org_name'
+        run: |
+          terraform init
+          terraform validate
