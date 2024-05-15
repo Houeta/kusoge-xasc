@@ -53,6 +53,7 @@ jobs:
       - name: Validate Code
         env:
           AWS_REGION: 'eu-central-1'
+          AWS_PROFILE: 'mfa'
           TF_VAR_env: 'test'
           TF_VAR_project: 'test'
           TF_VAR_vpc_id: 'vpc-123456'
