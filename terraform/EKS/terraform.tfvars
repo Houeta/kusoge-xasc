@@ -26,6 +26,6 @@ node_additional_tags = {
 argocd_namespace         = "argocd"
 argocd_helmchart_version = "6.7.17"
 
-argocd_github_client_id     = "Ov23liUYgJdHXgFTXyEp"
-argocd_github_client_secret = "d7167d208f9778a386d4aae2950ca7a05fc5a7d5"
+argocd_github_client_id     = "<your client id>"
+argocd_github_client_secret = "<your client secret>"
 argocd_github_org_name      = "Houeta-org"
